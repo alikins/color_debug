@@ -32,13 +32,14 @@ class DefaultAttrFilter(object):
         return True
 
 
-def _formatter(color_groups=None, fmt=None, default_color_by_attr=None):
+def _formatter(color_groups=None, fmt=None, default_color_by_attr=None, color_attrs=None):
     color_groups = color_groups or [('name', ['name', 'levelname'])]
     fmt = fmt or '%(levelname)s %(name)s %(message)s'
     default_color_by_attr = default_color_by_attr or 'name'
     formatter = color_debug.ColorFormatter(fmt=fmt,
                                            default_color_by_attr=default_color_by_attr,
-                                           color_groups=color_groups)
+                                           color_groups=color_groups,
+                                           color_attrs=color_attrs)
 
     return formatter
 
@@ -120,7 +121,10 @@ def main(args):
     fmt = '%(asctime)s %(threadName)-2s level: %(levelname)s module: %(module)s name: %(name)s funcName: %(funcName)s %(message)s'
     fmt_all = '%(asctime)s %(levelname)-0.1s %(levelno)-0.1d %(processName)-0.1s %(process)d %(threadName)s %(thread)d %(name)s %(module)s %(filename)s %(lineno)d - %(message)s'
 
-    formatter = _formatter(color_groups, fmt_all, default_color_by_attr='threadName')
+    formatter = _formatter(color_groups, fmt_all,
+                           default_color_by_attr='threadName')
+
+    #                       color_attrs=['asctime', 'module', 'process'])
     logger, handler = setup_logger(formatter)
 
     import logging_tree

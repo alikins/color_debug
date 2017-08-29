@@ -27,11 +27,14 @@ DEFAULT_FORMAT = ("""%(asctime)-15s"""
                   """%(_cdl_reset)s""")
 
 
-def find_format_attrs(format_string):
+def find_format_attrs(format_string, color_attrs=None):
     attrs_re_string = r"(?P<full_attr>%\((?P<attr_name>" + r'.*' + r"?)\).*?[dsf])"
 
     attrs_re = re.compile(attrs_re_string)
     format_attrs = attrs_re.findall(format_string)
+
+    if color_attrs:
+        format_attrs = [(attr_format, attr_name) for attr_format, attr_name in format_attrs if attr_name in color_attrs]
 
     return format_attrs
 
@@ -45,11 +48,11 @@ def context_color_format_string(format_string, format_attrs):
 
     '%(_cdl_process)s%(process)d%(_cdl_reset)s %(_cdl_threadName)%(threadName)s%(_cdl_reset)s - %(msg)'
 
-    Note that adding those log record attributes is left to... <FIXME>.
     '''
     format_attrs = find_format_attrs(format_string)
     # TODO: pass in a list of record/logFormatter attributes to be wrapped for colorization
 
+    print('format_attrs: %s' % format_attrs)
     color_attrs_string = '|'.join([x[1] for x in format_attrs])
 
     # This looks for log format strings like '%(threadName)s' or '$(process)d, and replaces
@@ -427,13 +430,15 @@ class ColorFormatter(logging.Formatter):
             self._color_fmt = context_color_format_string(self._base_fmt, self._format_attrs)
         return self._color_fmt
 
-    def __init__(self, fmt=None, default_color_by_attr=None, color_groups=None):
+    def __init__(self, fmt=None, default_color_by_attr=None, color_groups=None,
+                 color_attrs=None):
         fmt = fmt or DEFAULT_FORMAT
         logging.Formatter.__init__(self, fmt)
         self._base_fmt = fmt
         self._color_fmt = None
 
-        self._format_attrs = find_format_attrs(self._base_fmt)
+        self._format_attrs = find_format_attrs(self._base_fmt, color_attrs)
+        print('self._format_attrs: %s' % self._format_attrs)
 
         self.color_groups = color_groups or []
 
