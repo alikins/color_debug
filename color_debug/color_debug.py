@@ -115,7 +115,10 @@ class BaseColorMapper(object):
     #  ('attr', list_of_attrs_to_use 'attr''s color
     default_color_groups = [
         # color almost everything by logger name
-        ('name', ['filename', 'module', 'lineno', 'funcName', 'pathname'])]
+        ('name', ['filename', 'module', 'lineno', 'funcName', 'pathname']),
+        ('process', ['processName', 'thread', 'threadName']),
+        # ('_cdl_default', ['asctime']),
+        ('levelname', ['levelname', 'levelno'])]
     custom_attrs = ['levelname', 'levelno', 'process', 'processName', 'thread', 'threadName']
     high_cardinality = set(['asctime', 'created', 'msecs', 'relativeCreated', 'args', 'message'])
 
@@ -183,7 +186,8 @@ class TermColorMapper(BaseColorMapper):
     ALL_COLORS[RESET_SEQ_IDX] = RESET_SEQ
 
     DEFAULT_COLOR = WHITE
-    ALL_COLORS[DEFAULT_COLOR_IDX] = DEFAULT_COLOR
+    ALL_COLORS[DEFAULT_COLOR_IDX] = ALL_COLORS[DEFAULT_COLOR]
+
 
     # FIXME: use logging.DEBUG etc enums
     LEVEL_COLORS = {'TRACE': BLUE,
@@ -201,7 +205,7 @@ class TermColorMapper(BaseColorMapper):
                     # bold red?
                     'CRITICAL': RED}
 
-    default_color_groups = [
+    _default_color_groups = [
         # color almost everything by logger name
         # ('name', ['filename', 'module', 'lineno', 'funcName', 'pathname']),
         # ('process', ['default', 'message']),
@@ -374,16 +378,13 @@ class TermColorMapper(BaseColorMapper):
         # fields we don't need to calculate indiv, since they will be a different group
         in_a_group = set()
 
-        # print('self.group_by: %s' % self.group_by)
         for group, members in self.group_by:
             group_color = colors.get('_cdl_%s' % group, _default_color_index)
 
             for member in members:
                 colors['_cdl_%s' % member] = group_color
-                # print('group_color: %s' % group_color)
                 in_a_group.add(member)
 
-        # print('in_a_group: %s' % in_a_group)
         # calc_colors = set()
         for needed_attr in attrs_needed:
             if needed_attr in self.custom_attrs or needed_attr in in_a_group or needed_attr in self.high_cardinality:
@@ -410,12 +411,10 @@ def _apply_colors_to_record(record, colors):
     '''modify LogRecord in place (as side effect) adding _cdl_* attributes'''
     # apply the colors
     for cdl_name, color_value in colors.items():
-        # print('cdl_name: %s cdl_idx: %s' % (cdl_name, cdl_idx))
 
         # FIXME: revisit setting default idx to a color based on string
         # if cdl_idx == self.DEFAULT_COLOR_IDX:
         #    cdl_idx = _color_by_attr_index
-        # print('cdl_name: %s cdl_idx(2): %s' % (cdl_name, cdl_idx))
 
         # FIXME:
         setattr(record, cdl_name, color_value)
