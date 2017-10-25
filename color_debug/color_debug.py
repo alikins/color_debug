@@ -112,13 +112,13 @@ DEFAULT_COLOR_BY_ATTR = 'process'
 
 class BaseColorMapper(object):
     # default_color_groups is:
-    #  ('attr', list_of_attrs_to_use 'attr''s color
+    # ('attr', a_list_of_record_attrs_to_use_attrs_color)
     default_color_groups = [
         # color almost everything by logger name
         ('name', ['filename', 'module', 'lineno', 'funcName', 'pathname']),
         ('process', ['processName', 'thread', 'threadName']),
-        # ('_cdl_default', ['asctime']),
         ('levelname', ['levelname', 'levelno'])]
+
     custom_attrs = ['levelname', 'levelno', 'process', 'processName', 'thread', 'threadName']
     high_cardinality = set(['asctime', 'created', 'msecs', 'relativeCreated', 'args', 'message'])
 
@@ -162,47 +162,45 @@ class TermColorMapper(BaseColorMapper):
     COLOR_SEQ = "\033[1;%dm"
     BOLD_SEQ = "\033[1m"
 
-    NUMBER_OF_BASE_COLORS = 8
-    # NUMBER_OF_THREAD_COLORS = 216
+    # NUMBER_OF_THREAD_COLORS = 216 for 256 color terms
     # the xterm256 colors 0-8 and 8-16 are normal and bright term colors, 16-231 is from a 6x6x6 rgb cube
     # 232-255 are the grays (white to gray to black)
+    NUMBER_OF_BASE_COLORS = 8
     RGB_COLOR_OFFSET = 16
     START_OF_THREAD_COLORS = RGB_COLOR_OFFSET
     END_OF_THREAD_COLORS = 231
     NUMBER_OF_THREAD_COLORS = END_OF_THREAD_COLORS - RGB_COLOR_OFFSET
+
     BASE_COLORS = dict((color_number, color_seq) for
                        (color_number, color_seq) in [(x, "\033[38;5;%dm" % x) for x in range(NUMBER_OF_BASE_COLORS)])
+
     # \ x 1 b [ 38 ; 5; 231m
     THREAD_COLORS = dict((color_number, color_seq) for
                          (color_number, color_seq) in [(x, "\033[38;5;%dm" % x) for x in range(START_OF_THREAD_COLORS, END_OF_THREAD_COLORS)])
-    ALL_COLORS = {}
-    ALL_COLORS.update(BASE_COLORS)
-    ALL_COLORS.update(THREAD_COLORS)
+
 
     BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = BASE_COLORS.keys()
 
-    DEFAULT_COLOR_IDX = 257
+    # The indexes into ALL_COLORS list for special cases.
     RESET_SEQ_IDX = 256
-    ALL_COLORS[RESET_SEQ_IDX] = RESET_SEQ
+    DEFAULT_COLOR_IDX = 257
 
     DEFAULT_COLOR = WHITE
-    ALL_COLORS[DEFAULT_COLOR_IDX] = ALL_COLORS[DEFAULT_COLOR]
 
+    ALL_COLORS = {}
+    ALL_COLORS.update(BASE_COLORS)
+    ALL_COLORS.update(THREAD_COLORS)
+    ALL_COLORS[RESET_SEQ_IDX] = RESET_SEQ
+    ALL_COLORS[DEFAULT_COLOR_IDX] = ALL_COLORS[DEFAULT_COLOR]
 
     # FIXME: use logging.DEBUG etc enums
     LEVEL_COLORS = {'TRACE': BLUE,
                     'SUBDEBUG': BLUE,
                     'DEBUG': BLUE,
-                    # levels.VV: BASE_COLORS[BLUE],
-                    # levels.VVV: BASE_COLORS[BLUE],
-                    # levels.VVVV: BASE_COLORS[BLUE],
-                    # levels.VVVVV: BASE_COLORS[BLUE],
                     'INFO': GREEN,
-                    # levels.V: BASE_COLORS[GREEN],
                     'SUBWARNING': YELLOW,
                     'WARNING': YELLOW,
                     'ERROR': RED,
-                    # bold red?
                     'CRITICAL': RED}
 
     _default_color_groups = [
@@ -314,7 +312,6 @@ class TermColorMapper(BaseColorMapper):
     #       so that the entire blurb about process info matches instead of just the attribute
     #       - also allows format to just expand a '%(threadName)s' in fmt string to '%(theadNameColor)s%(threadName)s%(reset)s' before regular formatter
     # DOWNSIDE: Filter would need to be attach to the Logger not the Handler
-    # def add_color_attrs_to_record(self, record):
     def get_colors_for_record(self, record):
         '''For a log record, compute color for each field and return a color dict'''
 
@@ -385,13 +382,11 @@ class TermColorMapper(BaseColorMapper):
                 colors['_cdl_%s' % member] = group_color
                 in_a_group.add(member)
 
-        # calc_colors = set()
         for needed_attr in attrs_needed:
             if needed_attr in self.custom_attrs or needed_attr in in_a_group or needed_attr in self.high_cardinality:
                 continue
             color_idx = self.get_name_color(getattr(record, needed_attr))
             colors['_cdl_%s' % needed_attr] = color_idx
-            # calc_colors.add(needed_attr)
 
         # set the default color based on computed values, lookup the color
         # mapped to the attr default_color_by_attr  (ie, if 'process', lookup
@@ -487,17 +482,3 @@ class ColorFormatter(logging.Formatter):
         s = self.color_fmt % record.__dict__
         return s
 
-
-def _get_handler():
-    # %(asctime)s tid:%(thread)d
-    # fmt = u'\033[33m**: tname:%(threadName)s @%(filename)s:%(lineno)d - %(message)s\033[0m'
-    # fmt = u': tname:%(threadName)s @%(filename)s:%(lineno)d - %(message)s'
-    handler = logging.StreamHandler()
-    handler.setFormatter(ColorFormatter())
-    # handler.setFormatter(logging.Formatter(fmt))
-    handler.setLevel(logging.DEBUG)
-
-    return handler
-
-# logging.getLogger().setLevel(logging.DEBUG)
-# logging.getLogger().addHandler(_get_handler())
