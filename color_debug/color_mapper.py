@@ -62,9 +62,8 @@ class TermColorMapper(BaseColorMapper):
     # NUMBER_OF_THREAD_COLORS = 216 for 256 color terms
     # the xterm256 colors 0-8 and 8-16 are normal and bright term colors, 16-231 is from a 6x6x6 rgb cube
     # 232-255 are the grays (white to gray to black)
-    RGB_COLOR_OFFSET = 16
     END_OF_THREAD_COLORS = 231
-    NUMBER_OF_THREAD_COLORS = END_OF_THREAD_COLORS - RGB_COLOR_OFFSET
+    NUMBER_OF_THREAD_COLORS = END_OF_THREAD_COLORS
 
     # TODO: support changing background colors to get more color options
 
@@ -138,7 +137,7 @@ class TermColorMapper(BaseColorMapper):
         thread_mod = threadid % self.NUMBER_OF_THREAD_COLORS
         # print threadid, thread_mod % 220
         # return self.THREAD_COLORS[thread_mod]
-        return thread_mod + self.RGB_COLOR_OFFSET
+        return thread_mod
 
     # TODO: This could special case 'MainThread'/'MainProcess' to pick a good predictable color
     def get_name_color(self, name, perturb=None):
@@ -150,7 +149,7 @@ class TermColorMapper(BaseColorMapper):
         name_hash = sum([ord(x) for x in name])
         name_mod = name_hash % self.NUMBER_OF_THREAD_COLORS
         # return self.THREAD_COLORS[name_mod]
-        return name_mod + self.RGB_COLOR_OFFSET
+        return name_mod
 
     def get_level_color(self, levelname, levelno):
         level_color = self.LEVEL_COLORS.get(levelname, None)

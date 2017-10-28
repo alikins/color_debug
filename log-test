@@ -58,9 +58,9 @@ def gen_loggers(base_logger_name):
     xs = string.uppercase
     ys = string.lowercase
     zs = string.digits
-    x_size = 1
-    y_size = 1
-    z_size = 1
+    x_size = 2
+    y_size = 2
+    z_size = 2
 
     for x in [''] + list(xs[0:x_size]):
         for y in [''] + list(ys[0:y_size]):
