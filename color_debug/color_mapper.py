@@ -68,34 +68,25 @@ class TermColorMapper(BaseColorMapper):
     END_OF_THREAD_COLORS = 231
     NUMBER_OF_THREAD_COLORS = END_OF_THREAD_COLORS - RGB_COLOR_OFFSET
 
-    BASE_COLORS = dict((color_number, color_seq) for
-                       (color_number, color_seq) in [(x, "\033[38;5;%dm" % x) for x in range(NUMBER_OF_BASE_COLORS)])
-
-    # NOTE: We skip the bold/bright colors (8-16) here
-    # TODO: revisit bold/bright colors when we add support for RGB term colors
-
-    # \ x 1 b [ 38 ; 5; 231m
-    THREAD_COLORS = dict((color_number, color_seq) for
-                         (color_number, color_seq) in [(x, "\033[38;5;%dm" % x) for x in range(START_OF_THREAD_COLORS, END_OF_THREAD_COLORS)])
-
     # TODO: support changing background colors to get more color options
 
-    THREAD_COLORS2 = ["\033[38;5;%dm" % x for x in range(0, END_OF_THREAD_COLORS)]
 
-    BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = BASE_COLORS.keys()
 
-    # The indexes into ALL_COLORS list for special cases.
-    RESET_SEQ_IDX = 256
-    DEFAULT_COLOR_IDX = 257
+    ALL_COLORS = ["\033[38;5;%dm" % x for x in range(0, END_OF_THREAD_COLORS)]
 
+    BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = [0, 1, 2, 3, 4, 5, 6, 7]
     DEFAULT_COLOR = WHITE
 
+    # The indexes into ALL_COLORS list for special cases.
+    # RESET_SEQ_IDX = 256
+    # DEFAULT_COLOR_IDX = 257
+    i = len(ALL_COLORS)
+    ALL_COLORS.append(RESET_SEQ)
+    RESET_SEQ_IDX = i
 
-    ALL_COLORS = {}
-    ALL_COLORS.update(dict(enumerate(THREAD_COLORS2)))
+    ALL_COLORS.append(DEFAULT_COLOR)
+    DEFAULT_COLOR_IDX = i+1
 
-    ALL_COLORS[RESET_SEQ_IDX] = RESET_SEQ
-    ALL_COLORS[DEFAULT_COLOR_IDX] = ALL_COLORS[DEFAULT_COLOR]
 
     # FIXME: use logging.DEBUG etc enums
     LEVEL_COLORS = {'TRACE': BLUE,
