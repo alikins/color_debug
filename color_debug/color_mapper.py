@@ -62,15 +62,11 @@ class TermColorMapper(BaseColorMapper):
     # NUMBER_OF_THREAD_COLORS = 216 for 256 color terms
     # the xterm256 colors 0-8 and 8-16 are normal and bright term colors, 16-231 is from a 6x6x6 rgb cube
     # 232-255 are the grays (white to gray to black)
-    NUMBER_OF_BASE_COLORS = 8
     RGB_COLOR_OFFSET = 16
-    START_OF_THREAD_COLORS = RGB_COLOR_OFFSET
     END_OF_THREAD_COLORS = 231
     NUMBER_OF_THREAD_COLORS = END_OF_THREAD_COLORS - RGB_COLOR_OFFSET
 
     # TODO: support changing background colors to get more color options
-
-
 
     ALL_COLORS = ["\033[38;5;%dm" % x for x in range(0, END_OF_THREAD_COLORS)]
 
