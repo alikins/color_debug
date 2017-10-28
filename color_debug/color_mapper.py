@@ -165,7 +165,7 @@ class TermColorMapper(BaseColorMapper):
             - if threadName is 'MainThread', make tname_color and tid_color match MainProcess pname_color and pid_color
             - other threadNames get a new color and new tid_color
 
-            Existing get_*color_ methods attempt to divy up colors by mod 220 on tid/pid, or mod 220 on hash of thread or pid name
+            Existing get_*color_ methods attempt to divy up colors by mod NUMBER_OF_COLORS on tid/pid, or mod NUMBER_OF_COLORS on hash of thread or pid name
             NOTE: This doesn't track any state so there is no ordering or prefence to the colors given out.
 
         '''
@@ -237,14 +237,14 @@ class TermColorMapper(BaseColorMapper):
             # record._cdl_levelname = level_color
             colors['_cdl_levelname'] = level_color
 
-        # set a different color for each logger name. And by default, make filename, funcName, and lineno match.
+        # set a different color for each logger name if needed.
         use_name_color = 'name' in group_by_attrs
         if use_name_color:
-            # module_and_method_color = self.get_name_color('%s.%s' % (record.name, record.funcName))
             module_and_method_color = self.get_name_color(record.name)
             colors['_cdl_name'] = module_and_method_color
             # group mapping should take care of the rest of these once _cdl_name is set
 
+        # figure out if we need to get per process/thread colors
         use_thread_color = False
         for attr in ['process', 'processName', 'thread', 'threadName']:
             if attr in group_by_attrs:
@@ -265,10 +265,13 @@ class TermColorMapper(BaseColorMapper):
         for group, members in self.group_by:
             group_color = colors.get('_cdl_%s' % group, _default_color_index)
 
+            # set the color for these record attributes to match the color of their group
             for member in members:
                 colors['_cdl_%s' % member] = group_color
                 in_a_group.add(member)
 
+        # find a color for any remaining record attrs that need a color. Skip custom attrs, or attrs
+        # that are right hand side of color_groups. Also skip 'high cardinality' record attrs like the timestamp.
         for needed_attr in attrs_needed:
             if needed_attr in self.custom_attrs or needed_attr in in_a_group or needed_attr in self.high_cardinality:
                 continue
@@ -280,6 +283,9 @@ class TermColorMapper(BaseColorMapper):
         # record._cdl_process and set self.default_color to that value
         _color_by_attr_index = colors[self.default_attr_string]
 
+        # Build up a map of the '_cdl_' prepended log record attribute name ('levelno', 'funcName', etc) to the string containing
+        # the color escape codes via the indexes and self.ALL_COLORS
+        # name_to_color_map looks like {'_cdl_funcName': some_escape_code_string, ...}
         name_to_color_map = {}
         for cdl_name, cdl_idx in colors.items():
             # FIXME: revisit setting default idx to a color based on string
