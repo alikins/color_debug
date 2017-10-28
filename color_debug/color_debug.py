@@ -147,6 +147,9 @@ class ColorFormatter(logging.Formatter):
                                                          color_groups=self.color_groups,
                                                          format_attrs=self._format_attrs)
 
+        import pprint
+        pprint.pprint(self.color_mapper.ALL_COLORS)
+
     def _pre_format(self, record):
         '''render time and exception info to be a string
 

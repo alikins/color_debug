@@ -80,6 +80,8 @@ class TermColorMapper(BaseColorMapper):
 
     # TODO: support changing background colors to get more color options
 
+    THREAD_COLORS2 = ["\033[38;5;%dm" % x for x in range(0, END_OF_THREAD_COLORS)]
+
     BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = BASE_COLORS.keys()
 
     # The indexes into ALL_COLORS list for special cases.
@@ -88,13 +90,10 @@ class TermColorMapper(BaseColorMapper):
 
     DEFAULT_COLOR = WHITE
 
-    # FIXME: ALL_COLORS is a dict indexed by an  incremental int
-    #        Could/should be an array. Though the dict could allow
-    #        keys like 'default' or 'reset' which would be less obtust
-    #        than All_COLORS[257] to get reset.
+
     ALL_COLORS = {}
-    ALL_COLORS.update(BASE_COLORS)
-    ALL_COLORS.update(THREAD_COLORS)
+    ALL_COLORS.update(dict(enumerate(THREAD_COLORS2)))
+
     ALL_COLORS[RESET_SEQ_IDX] = RESET_SEQ
     ALL_COLORS[DEFAULT_COLOR_IDX] = ALL_COLORS[DEFAULT_COLOR]
 

@@ -134,7 +134,8 @@ def main(args):
     fmt = '%(asctime)s %(threadName)-2s level: %(levelname)s module: %(module)s name: %(name)s funcName: %(funcName)s %(message)s'
     fmt_all = '%(asctime)s %(levelname)-0.1s %(levelno)-0.1d %(processName)-0.1s %(process)d %(threadName)s %(thread)d %(name)s %(module)s %(filename)s %(lineno)d - %(message)s'
 
-    formatter = _formatter(color_groups, fmt_all, default_color_by_attr='threadName')
+    #formatter = _formatter(color_groups, fmt_all, default_color_by_attr='threadName')
+    formatter = _formatter(color_groups, fmt_all, default_color_by_attr='name')
     logger, handler = setup_logger(formatter)
 
     import logging_tree
