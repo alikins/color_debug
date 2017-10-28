@@ -59,11 +59,13 @@ class TermColorMapper(BaseColorMapper):
     # NUMBER_OF_COLORS = 216 for 256 color terms
     # the xterm256 colors 0-8 and 8-16 are normal and bright term colors, 16-231 is from a 6x6x6 rgb cube
     # 232-255 are the grays (white to gray to black)
+    # 231 = 255 - 16 grays
     END_OF_COLORS = 231
     NUMBER_OF_COLORS = END_OF_COLORS
 
     # TODO: support changing background colors to get more color options
-
+    # TODO: Filter out colors that are too close to term background color, ie
+    #       support light/dark themes
     ALL_COLORS = ["\033[38;5;%dm" % x for x in range(0, END_OF_COLORS)]
 
     BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = [0, 1, 2, 3, 4, 5, 6, 7]
@@ -77,7 +79,7 @@ class TermColorMapper(BaseColorMapper):
     RESET_SEQ_IDX = i
 
     ALL_COLORS.append(DEFAULT_COLOR)
-    DEFAULT_COLOR_IDX = i+1
+    DEFAULT_COLOR_IDX = i + 1
 
 
     # FIXME: use logging.DEBUG etc enums
@@ -171,6 +173,7 @@ class TermColorMapper(BaseColorMapper):
         # 'pname' is almost always 'MainProcess' which ends up a ugly yellow. perturb is here to change the color
         # that 'MainProcess' ends up to a nicer light green
         perturb = 'pseudoenthusiastically'
+        # perturb = None
         # perturb = 'a'
         # combine pid+pname otherwise, all MainProcess will get the same pname
         pid_label = '%s%s' % (pname, pid)
