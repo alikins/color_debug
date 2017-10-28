@@ -56,18 +56,15 @@ class TermColorMapper(BaseColorMapper):
     COLOR_SEQ = "\033[1;%dm"
     BOLD_SEQ = "\033[1m"
 
-    # Note: 'THREAD_COLORS' is a misnomer now and just means all of the colors
-    # TODO: update THREAD_COLOR usage
-
-    # NUMBER_OF_THREAD_COLORS = 216 for 256 color terms
+    # NUMBER_OF_COLORS = 216 for 256 color terms
     # the xterm256 colors 0-8 and 8-16 are normal and bright term colors, 16-231 is from a 6x6x6 rgb cube
     # 232-255 are the grays (white to gray to black)
-    END_OF_THREAD_COLORS = 231
-    NUMBER_OF_THREAD_COLORS = END_OF_THREAD_COLORS
+    END_OF_COLORS = 231
+    NUMBER_OF_COLORS = END_OF_COLORS
 
     # TODO: support changing background colors to get more color options
 
-    ALL_COLORS = ["\033[38;5;%dm" % x for x in range(0, END_OF_THREAD_COLORS)]
+    ALL_COLORS = ["\033[38;5;%dm" % x for x in range(0, END_OF_COLORS)]
 
     BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = [0, 1, 2, 3, 4, 5, 6, 7]
     DEFAULT_COLOR = WHITE
@@ -134,9 +131,7 @@ class TermColorMapper(BaseColorMapper):
     # TODO: this could be own class/methods like ContextColor(log_record) that returns color info
     def get_thread_color(self, threadid):
         # 220 is useable 256 color term color (forget where that comes from? some min delta-e division of 8x8x8 rgb colorspace?)
-        thread_mod = threadid % self.NUMBER_OF_THREAD_COLORS
-        # print threadid, thread_mod % 220
-        # return self.THREAD_COLORS[thread_mod]
+        thread_mod = threadid % self.NUMBER_OF_COLORS
         return thread_mod
 
     # TODO: This could special case 'MainThread'/'MainProcess' to pick a good predictable color
@@ -147,8 +142,7 @@ class TermColorMapper(BaseColorMapper):
         name = '%s%s' % (name, perturb)
         # name_hash = hash(name)
         name_hash = sum([ord(x) for x in name])
-        name_mod = name_hash % self.NUMBER_OF_THREAD_COLORS
-        # return self.THREAD_COLORS[name_mod]
+        name_mod = name_hash % self.NUMBER_OF_COLORS
         return name_mod
 
     def get_level_color(self, levelname, levelno):
