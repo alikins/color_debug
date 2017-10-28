@@ -28,8 +28,8 @@ class BaseColorMapper(object):
 
         self._format_attrs = format_attrs
 
-    def get_thread_color(self, thread_id):
-        '''return color idx for thread_id'''
+    def get_int_color(self, an_int):
+        '''return color idx for an_int'''
         return 0
 
     def get_name_color(self, name, perturb=None):
@@ -131,10 +131,10 @@ class TermColorMapper(BaseColorMapper):
     #        maybe split on '.' and set initial color based on hash of sub logger name?
     # SEEALSO: chromalog module does something similar, may be easiest to extend
     # TODO: this could be own class/methods like ContextColor(log_record) that returns color info
-    def get_thread_color(self, threadid):
+    def get_int_color(self, an_int):
         # 220 is useable 256 color term color (forget where that comes from? some min delta-e division of 8x8x8 rgb colorspace?)
-        thread_mod = threadid % self.NUMBER_OF_COLORS
-        return thread_mod
+        color_idx = an_int % self.NUMBER_OF_COLORS
+        return color_idx
 
     # TODO: This could special case 'MainThread'/'MainProcess' to pick a good predictable color
     def get_name_color(self, name, perturb=None):
@@ -182,7 +182,7 @@ class TermColorMapper(BaseColorMapper):
         if pname == 'MainProcess':
             pid_color = pname_color
         else:
-            pid_color = self.get_thread_color(pid)
+            pid_color = self.get_int_color(pid)
 
         if tname == 'MainThread':
             # tname_color = pname_color
@@ -190,7 +190,7 @@ class TermColorMapper(BaseColorMapper):
             tid_color = tname_color
         else:
             tname_color = self.get_name_color(tname)
-            tid_color = self.get_thread_color(tid)
+            tid_color = self.get_int_color(tid)
 
         return pname_color, pid_color, tname_color, tid_color
 
