@@ -56,6 +56,9 @@ class TermColorMapper(BaseColorMapper):
     COLOR_SEQ = "\033[1;%dm"
     BOLD_SEQ = "\033[1m"
 
+    # Note: 'THREAD_COLORS' is a misnomer now and just means all of the colors
+    # TODO: update THREAD_COLOR usage
+
     # NUMBER_OF_THREAD_COLORS = 216 for 256 color terms
     # the xterm256 colors 0-8 and 8-16 are normal and bright term colors, 16-231 is from a 6x6x6 rgb cube
     # 232-255 are the grays (white to gray to black)
@@ -68,10 +71,14 @@ class TermColorMapper(BaseColorMapper):
     BASE_COLORS = dict((color_number, color_seq) for
                        (color_number, color_seq) in [(x, "\033[38;5;%dm" % x) for x in range(NUMBER_OF_BASE_COLORS)])
 
+    # NOTE: We skip the bold/bright colors (8-16) here
+    # TODO: revisit bold/bright colors when we add support for RGB term colors
+
     # \ x 1 b [ 38 ; 5; 231m
     THREAD_COLORS = dict((color_number, color_seq) for
                          (color_number, color_seq) in [(x, "\033[38;5;%dm" % x) for x in range(START_OF_THREAD_COLORS, END_OF_THREAD_COLORS)])
 
+    # TODO: support changing background colors to get more color options
 
     BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = BASE_COLORS.keys()
 
@@ -81,6 +88,10 @@ class TermColorMapper(BaseColorMapper):
 
     DEFAULT_COLOR = WHITE
 
+    # FIXME: ALL_COLORS is a dict indexed by an  incremental int
+    #        Could/should be an array. Though the dict could allow
+    #        keys like 'default' or 'reset' which would be less obtust
+    #        than All_COLORS[257] to get reset.
     ALL_COLORS = {}
     ALL_COLORS.update(BASE_COLORS)
     ALL_COLORS.update(THREAD_COLORS)
