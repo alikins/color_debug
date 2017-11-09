@@ -87,7 +87,7 @@ def context_color_format_string(format_string, format_attrs):
     print('\nformat_string:\n%s' % format_string)
     print('\ncolor_attrs_string:\n%s' % color_attrs_string)
 
-    re_string = r"(?P<full_attr>%\((?P<attr_name>" + color_attrs_string + r"?)\).*?[dsf])"
+    re_string = r"""(?P<full_attr>.*?(?P<attr_name>(""" + color_attrs_string + r""")))"""
 
     print('\nre_string:\n%s' % re_string)
     color_format_re = re.compile(re_string)
