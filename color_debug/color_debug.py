@@ -1,3 +1,4 @@
+import copy
 import logging
 import re
 
@@ -29,11 +30,15 @@ DEFAULT_FORMAT = ("""%(asctime)-15s"""
 
 
 def find_format_attrs(format_string):
-    attrs_re_string = r"(?P<full_attr>%\((?P<attr_name>" + r'.*' + r"?)\).*?[dsf])"
+    # attrs_re_string = r"(?P<attr_context>\s+.*?=?(?P<full_attr>%\((?P<attr_name>" + r'.*' + r"?)\).*?[dsf]))"
+    attrs_re_string = r"[: ]?(?P<attr_context>.*?[=\s]?(?P<full_attr>%\((?P<attr_name>" + r'.*' + r"?)\).*?[dsf])[^:\s]*)"
 
     attrs_re = re.compile(attrs_re_string)
     format_attrs = attrs_re.findall(format_string)
 
+    print('format_attrs')
+    for i in format_attrs:
+        print('%s' % repr(i))
     return format_attrs
 
 
@@ -51,7 +56,7 @@ def context_color_format_string(format_string, format_attrs):
     format_attrs = find_format_attrs(format_string)
     # TODO: pass in a list of record/logFormatter attributes to be wrapped for colorization
 
-    color_attrs_string = '|'.join([x[1] for x in format_attrs])
+    color_attrs_string = '|'.join([x[2] for x in format_attrs])
 
     # This looks for log format strings like '%(threadName)s' or '$(process)d, and replaces
     # the format specifier with a version wrapped with log record color attributes.
@@ -332,7 +337,7 @@ class TermColorMapper(BaseColorMapper):
         # could be self._format_attrs (actually used in format string) + any referenced as color_group keys
         group_by_attrs = [y[0] for y in self.group_by]
 
-        format_attrs = [z[1] for z in self._format_attrs]
+        format_attrs = [z[2] for z in self._format_attrs]
 
         # attrs_needing_default = self.default_record_attrs + self.custom_record_attrs
         attrs_needed = group_by_attrs + format_attrs
@@ -395,7 +400,10 @@ class TermColorMapper(BaseColorMapper):
         # set the default color based on computed values, lookup the color
         # mapped to the attr default_color_by_attr  (ie, if 'process', lookup
         # record._cdl_process and set self.default_color to that value
-        _color_by_attr_index = colors[self.default_attr_string]
+        try:
+            _color_by_attr_index = colors[self.default_attr_string]
+        except KeyError as exc:
+            _color_by_attr_index = self.DEFAULT_COLOR_IDX
 
         name_to_color_map = {}
         for cdl_name, cdl_idx in colors.items():
@@ -449,6 +457,9 @@ class ColorFormatter(logging.Formatter):
                                             color_groups=self.color_groups,
                                             format_attrs=self._format_attrs)
 
+    def __repr__(self):
+        return "%s(fmt=%s)" % (self.__class__.__name__, self._base_fmt)
+
     def _pre_format(self, record):
         '''render time and exception info to be a string
 
@@ -468,14 +479,15 @@ class ColorFormatter(logging.Formatter):
         return '%s%s%s' % (record._cdl_exc_text, exc_text_post, record._cdl_exc_text)
 
     def format(self, record):
-        self._pre_format(record)
-        colors = self.color_mapper.get_colors_for_record(record)
-        _apply_colors_to_record(record, colors)
+        new_record = copy.copy(record)
+        self._pre_format(new_record)
+        colors = self.color_mapper.get_colors_for_record(new_record)
+        _apply_colors_to_record(new_record, colors)
 
         # pprint.pprint(colors)
-        s = self._format(record)
-        if getattr(record, 'exc_text', None):
-            s = s + self._format_exception(record, colors, record.exc_text)
+        s = self._format(new_record)
+        if getattr(new_record, 'exc_text', None):
+            s = s + self._format_exception(new_record, colors, new_record.exc_text)
         return s
 
     # format is based on from stdlib python logging.LogFormatter.format()
@@ -485,7 +497,25 @@ class ColorFormatter(logging.Formatter):
         # import pprint
         # pprint.pprint(record.__dict__)
         record.message = record.getMessage()
-        s = self.color_fmt % record.__dict__
+        try:
+            s = self.color_fmt % record.__dict__
+        except TypeError as exc:
+            import pprint
+            #print('error in format, color.fmt="%s", record=%s' % (self.color_fmt,
+            #                                                      pprint.pformat(record.__dict__)))
+            # print(exc)
+            for f, n in self._format_attrs:
+                print(f)
+                print(n)
+                print(record.__dict__[n])
+                print('\n')
+                #if n not in record.__dict__:
+                #    print('%s format attr not found in dict' % n)
+
+            #for i in record.__dict__:
+            #    if self.color_fmt.find(i) == -1:
+            #        print('%s not found in format' % i)
+            raise
         return s
 
 

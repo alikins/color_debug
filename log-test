@@ -111,6 +111,7 @@ def gen_log_events(msg, sleep):
         except Exception as e:
             log.exception(e)
 
+        break
     other_module.func3()
 
 
@@ -132,7 +133,7 @@ def main(args):
                     ('levelname', ['levelno'])]
     # fmt = '%(asctime)s %(relativeCreated)d %(levelname)s %(module)s %(name)s %(funcName)s %(random)s %(message)s'
     fmt = '%(asctime)s %(threadName)-2s level: %(levelname)s module: %(module)s name: %(name)s funcName: %(funcName)s %(message)s'
-    fmt_all = '%(asctime)s %(levelname)-0.1s %(levelno)-0.1d %(processName)-0.1s %(process)d %(threadName)s %(thread)d %(name)s %(module)s %(filename)s %(lineno)d - %(message)s'
+    fmt_all = '%(asctime)s level=%(levelname)-0.1s %(levelno)-0.1d %(processName)-0.1s %(process)d %(threadName)s thread=%(thread)d %(name)s module=%(module)s %(filename)s %(lineno)d - %(message)s'
 
     formatter = _formatter(color_groups, fmt_all, default_color_by_attr='threadName')
     logger, handler = setup_logger(formatter)
