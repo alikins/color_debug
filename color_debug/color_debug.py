@@ -56,7 +56,8 @@ def context_color_format_string(format_string, format_attrs):
     format_attrs = find_format_attrs(format_string)
     # TODO: pass in a list of record/logFormatter attributes to be wrapped for colorization
 
-    color_attrs_string = '|'.join([x[2] for x in format_attrs])
+    # color_attrs_string = r'|'.join([x[0].replace('(', '\(' ).replace(')', '\)' ) for x in format_attrs])
+    color_attrs_string = r'|'.join([re.escape(x[0]) for x in format_attrs])
 
     # This looks for log format strings like '%(threadName)s' or '$(process)d, and replaces
     # the format specifier with a version wrapped with log record color attributes.
@@ -83,8 +84,12 @@ def context_color_format_string(format_string, format_attrs):
     # is extract so it can be used in the name of the color debug logger attribute that will set the color info
     # For '%(process)-10d', that would make 'process' the attr_name, and the color attribute '%(_cdl_process)'
     # color_attrs_string is a sub regex of the attr names to be given color using the re alternate '|' notation.
+    print('\nformat_string:\n%s' % format_string)
+    print('\ncolor_attrs_string:\n%s' % color_attrs_string)
+
     re_string = r"(?P<full_attr>%\((?P<attr_name>" + color_attrs_string + r"?)\).*?[dsf])"
 
+    print('\nre_string:\n%s' % re_string)
     color_format_re = re.compile(re_string)
 
     replacement = r"%(_cdl_\g<attr_name>)s\g<full_attr>%(_cdl_unset)s"
@@ -96,7 +101,10 @@ def context_color_format_string(format_string, format_attrs):
     # for match in format_attrs.groups():
     #    print('match: %s' % match)
 
+    print('\nreplacement:\n%s' % replacement)
+
     format_string2 = color_format_re.sub(replacement, format_string)
+    print('\nformat_string2:\n%s' % format_string2)
 
     # set the default color at the begining of the format string and add a reset to the end
     format_string = r"%(_cdl_default)s" + format_string2 + r"%(_cdl_reset)s"
