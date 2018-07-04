@@ -395,7 +395,7 @@ class TermColorMapper(BaseColorMapper):
             group_color = colors.get('_cdl_%s' % group, _default_color_index)
             if group in self.custom_attrs or group in in_a_group or group in self.high_cardinality:
                 continue
-            color_idx = self.get_name_color(getattr(record, group))
+            color_idx = self.get_name_color(getattr(record, group, ''))
             colors['_cdl_%s' % group] = color_idx
 
         for group, members in self.group_by:
@@ -409,7 +409,7 @@ class TermColorMapper(BaseColorMapper):
         for needed_attr in attrs_needed:
             if needed_attr in self.custom_attrs or needed_attr in in_a_group or needed_attr in self.high_cardinality:
                 continue
-            color_idx = self.get_name_color(getattr(record, needed_attr))
+            color_idx = self.get_name_color(getattr(record, needed_attr, ''))
             colors['_cdl_%s' % needed_attr] = color_idx
             # calc_colors.add(needed_attr)
 
@@ -463,6 +463,8 @@ class ColorFormatter(logging.Formatter):
         # the name of the record attribute to check for a default color
         self.default_attr_string = '_cdl_%s' % self.default_color_by_attr
 
+        self.should_add_missing_fmt_attrs = True
+
         self.color_mapper = TermColorMapper(fmt=self._base_fmt,
                                             default_color_by_attr=self.default_color_by_attr,
                                             color_groups=self.color_groups,
@@ -501,8 +503,19 @@ class ColorFormatter(logging.Formatter):
     # just appends the exception string from formatException() to the formatted message.
     def _format(self, record):
         record.message = record.getMessage()
+        # print(self._format_attrs)
+        if self.should_add_missing_fmt_attrs:
+            self.add_missing_fmt_attrs(record)
+
         s = self.color_fmt % record.__dict__
         return s
+
+    def add_missing_fmt_attrs(self, record):
+        for (fmt_blurb, fmt_name) in self._format_attrs:
+            if not hasattr(record, fmt_name):
+                setattr(record, fmt_name, '')
+
+
 
 
 def _get_handler():

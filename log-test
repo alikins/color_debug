@@ -110,6 +110,7 @@ def gen_log_events(msg, sleep):
             func3()
         except Exception as e:
             log.exception(e)
+        logger.log(level, 'a=%s b=%s', 'AAA', 'BBB', extra={'some_extra': 98765})
 
     other_module.func3()
 
@@ -129,12 +130,19 @@ def _gen_log_events(handler):
 def main(args):
     color_groups = [('threadName', ['process', 'processName', 'thread', 'message', 'default', 'exc_text']),
                     # ('name', ['name', 'levelname']),
+                    ('msg', ['asctime', 'message']),
                     ('levelname', ['levelno'])]
+    color_groups = [
+        ('msg', ['asctime', 'name', 'module']),
+        ('args', ['message']),
+        ('some_extra', ['filename', 'funcName']),
+    ]
     # fmt = '%(asctime)s %(relativeCreated)d %(levelname)s %(module)s %(name)s %(funcName)s %(random)s %(message)s'
     fmt = '%(asctime)s %(threadName)-2s level: %(levelname)s module: %(module)s name: %(name)s funcName: %(funcName)s %(message)s'
-    fmt_all = '%(asctime)s %(levelname)-0.1s %(levelno)-0.1d %(processName)-0.1s %(process)d %(threadName)s %(thread)d %(name)s %(module)s %(filename)s %(lineno)d - %(message)s'
+    fmt_all = '%(asctime)s "%(msg)s" |args=%(args)s| some_extra=%(some_extra)s %(levelname)-0.1s %(levelno)-0.1d %(processName)-0.1s %(process)d %(threadName)s %(thread)d %(name)s %(module)s %(filename)s %(lineno)d - %(message)s'
 
-    formatter = _formatter(color_groups, fmt_all, default_color_by_attr='threadName')
+    # formatter = _formatter(color_groups, fmt_all, default_color_by_attr='threadName')
+    formatter = _formatter(color_groups, fmt_all, default_color_by_attr='msg')
     logger, handler = setup_logger(formatter)
 
     import logging_tree
