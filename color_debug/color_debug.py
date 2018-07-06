@@ -482,6 +482,7 @@ class ColorFormatter(logging.Formatter):
 
     def __init__(self, fmt=None, default_color_by_attr=None,
                  color_groups=None, auto_color=False, datefmt=None):
+
         fmt = fmt or DEFAULT_FORMAT
         logging.Formatter.__init__(self, fmt, datefmt=datefmt)
         self._base_fmt = fmt
@@ -503,10 +504,12 @@ class ColorFormatter(logging.Formatter):
                                             auto_color=auto_color)
 
     def __repr__(self):
-        buf = 'ColorFormatter(fmt="%s", datefmt="%s", auto_color=%s)' % (self._base_fmt,
-                                                                         self.datefmt,
-                                                                         self.color_mapper.auto_color)
-        return buf
+        return '%s(fmt="%s", datefmt="%s", default_color_by_attr="%s", color_groups=%s)' % \
+            (self.__class__.__name__,
+             self._base_fmt,
+             self.datefmt,
+             self.default_color_by_attr,
+             self.color_groups)
 
     def _pre_format(self, record):
         '''render time and exception info to be a string

@@ -6,6 +6,7 @@
 import pytest
 
 import logging
+import logging.config
 try:
     from logging import NullHandler
 except ImportError:
@@ -103,6 +104,38 @@ def test_stuff():
     for record in handler.record_buf:
         print(record.message)
 
+
+def test_dict_config():
+    log_config = {
+        'version': 1,
+        'disable_existing_loggers': False,
+
+        'formatters': {
+            'verbose': {
+                'format': '[%(asctime)s %(process)05d %(levelname)-0.1s] %(name)s %(funcName)s:%(lineno)d - %(message)s',
+            },
+        },
+        'filters': {},
+        'handlers': {
+            'buffered': {
+                'level': 'DEBUG',
+                'formatter': 'verbose',
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'loggers': {
+            'foobar': {
+                'handlers': ['buffered'],
+                'level': 'DEBUG',
+            },
+        }
+    }
+
+    conf = logging.config.dictConfig(log_config)
+    flog = logging.getLogger('foobar')
+    flog.debug('fd')
+    flog.info('fi')
+    flog.warn('fwarn')
 
 def test_init(response):
     """Just init the class"""
