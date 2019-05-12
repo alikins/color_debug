@@ -2,6 +2,7 @@ import logging
 import re
 
 from . import term_mapper
+from . import mapper
 
 DEFAULT_FORMAT = ("""%(asctime)-15s"""
                   """ %(levelname)-0.1s"""
@@ -202,8 +203,7 @@ class ColorFormatter(logging.Formatter):
 
 class TermFormatter(ColorFormatter):
     def __init__(self, fmt=None, default_color_by_attr=None,
-                 color_groups=None, auto_color=False, datefmt=None,
-                 color_mapper=None):
+                 color_groups=None, auto_color=False, datefmt=None):
 
         super(TermFormatter, self).__init__(fmt=fmt,
                                             default_color_by_attr=default_color_by_attr,
