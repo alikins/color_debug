@@ -201,6 +201,7 @@ class ColorFormatter(logging.Formatter):
     def _format(self, record_context):
         return self.color_fmt % record_context
 
+
 class TermFormatter(ColorFormatter):
     def __init__(self, fmt=None, default_color_by_attr=None,
                  color_groups=None, auto_color=False, datefmt=None):
