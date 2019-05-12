@@ -53,7 +53,8 @@ class TermColorMapper(mapper.BaseColorMapper):
     # NUMBER_OF_THREAD_COLORS = 216
     # the xterm256 colors 0-8 and 8-16 are normal and bright term colors, 16-231 is from a 6x6x6 rgb cube
     # 232-255 are the grays (white to gray to black)
-    RGB_COLOR_OFFSET = 16 + 2
+    #RGB_COLOR_OFFSET = 16 + 2
+    RGB_COLOR_OFFSET = 0
     # +2 is to skip black and very dark blue as valid color.
     # FIXME: needs to learn to support dark/light themes
     START_OF_THREAD_COLORS = RGB_COLOR_OFFSET
@@ -61,13 +62,15 @@ class TermColorMapper(mapper.BaseColorMapper):
     NUMBER_OF_THREAD_COLORS = END_OF_THREAD_COLORS - RGB_COLOR_OFFSET
 
     BASE_COLORS = dict((color_number, color_seq) for
-                       (color_number, color_seq) in [(x, "\033[38;5;%dm" % x) for x in range(NUMBER_OF_BASE_COLORS)])
+                       (color_number, color_seq) in [(x, "\033[38;5;%dm" % (x+8)) for x in range(NUMBER_OF_BASE_COLORS)])
+
     # \ x 1 b [ 38 ; 5; 231m
     THREAD_COLORS = dict((color_number, color_seq) for
                          (color_number, color_seq) in [(x, "\033[38;5;%dm" % x) for x in range(START_OF_THREAD_COLORS, END_OF_THREAD_COLORS)])
     ALL_COLORS = {}
     ALL_COLORS.update(BASE_COLORS)
-    ALL_COLORS.update(THREAD_COLORS)
+    # ALL_COLORS.update(THREAD_COLORS)
+
 
     # import sys
     # for x in ALL_COLORS:
@@ -81,9 +84,11 @@ class TermColorMapper(mapper.BaseColorMapper):
     DEFAULT_COLOR = WHITE
     ALL_COLORS[DEFAULT_COLOR_IDX] = ALL_COLORS[DEFAULT_COLOR]
 
+    NUMBER_OF_COLORS =len(ALL_COLORS)
+
     # FIXME: use logging.DEBUG etc enums
     LEVEL_COLORS = {'TRACE': BLUE,
-                    'SUBDEBUG': BLUE,
+                    # 'SUBDEBUG': BLUE,
                     'DEBUG': BLUE,
                     # levels.VV: BASE_COLORS[BLUE],
                     # levels.VVV: BASE_COLORS[BLUE],
@@ -110,7 +115,7 @@ class TermColorMapper(mapper.BaseColorMapper):
     # TODO: this could be own class/methods like ContextColor(log_record) that returns color info
     def get_thread_color(self, threadid):
         # 220 is useable 256 color term color (forget where that comes from? some min delta-e division of 8x8x8 rgb colorspace?)
-        thread_mod = threadid % self.NUMBER_OF_THREAD_COLORS
+        thread_mod = threadid % self.NUMBER_OF_COLORS
         # print threadid, thread_mod % 220
         # return self.THREAD_COLORS[thread_mod]
         return thread_mod + self.RGB_COLOR_OFFSET
@@ -124,7 +129,7 @@ class TermColorMapper(mapper.BaseColorMapper):
         name = '%s%s' % (name, perturb)
         # name_hash = hash(name)
         name_hash = sum([ord(x) for x in name])
-        name_mod = name_hash % self.NUMBER_OF_THREAD_COLORS
+        name_mod = name_hash % self.NUMBER_OF_COLORS
         # return self.THREAD_COLORS[name_mod]
         return name_mod + self.RGB_COLOR_OFFSET
 
