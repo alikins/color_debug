@@ -64,3 +64,55 @@ class BaseColorMapper(object):
 
     def get_colors_for_attr(self, record):
         return {}
+
+
+class HtmlMapper(BaseColorMapper):
+    NUMBER_OF_COLORS = 8
+    colors = ['#000000',
+              '#222222',
+              '#444444',
+              '#666666',
+              '#888888',
+              '#bbbbbb',
+              '#dddddd',
+              '#eeeeee']
+
+    LEVEL_COLORS = {'TRACE': 0,
+                    'SUBDEBUG': 1,
+                    'DEBUG': 2,
+                    'INFO': 3,
+                    'SUBWARNING': 4,
+                    'WARNING': 5,
+                    'ERROR': 6,
+                    'CRITICAL': 7}
+
+    def get_colors_for_record(self, record, format_attrs):
+        color_map  = {'_cdl_default': 0,
+                      '_cdl_message': 0,
+                      '_cdl_reset': 0,
+                      '_cdl_unset': 9}
+        module_and_method_color = self.get_name_color(record.name)
+        # colors['_cdl_name'] = module_and_method_color
+        color_map['_cdl_name'] = module_and_method_color
+
+        level_color = self.get_level_color(record.levelname, record.levelno)
+        # record._cdl_levelname = level_color
+        # colors['_cdl_levelname'] = level_color
+        color_map['_cdl_levelname'] = level_color
+
+        return color_map
+
+    # TODO: This could special case 'MainThread'/'MainProcess' to pick a good predictable color
+    def get_name_color(self, name, perturb=None):
+        perturb = perturb or 'xccvsdfb'
+        name = '%s%s' % (name, perturb)
+        name_hash = sum([ord(x) for x in name])
+        name_mod = name_hash % self.NUMBER_OF_COLORS
+        return name_mod
+
+    def get_level_color(self, levelname, levelno):
+        level_color = self.LEVEL_COLORS.get(levelname, None)
+        if not level_color:
+            level_color = self.LEVEL_COLORS.get(levelno, self.default_color)
+        return level_color
+
