@@ -217,3 +217,20 @@ class TermFormatter(ColorFormatter):
                                                         color_groups=color_groups,
                                                         format_attrs=self._format_attrs,
                                                         auto_color=auto_color)
+
+
+class HtmlFormatter(ColorFormatter):
+    def __init__(self, fmt=None, default_color_by_attr=None,
+                 color_groups=None, auto_color=False, datefmt=None):
+
+        super(HtmlFormatter, self).__init__(fmt=fmt,
+                                            default_color_by_attr=default_color_by_attr,
+                                            color_groups=color_groups,
+                                            auto_color=auto_color,
+                                            datefmt=datefmt)
+
+        self.color_mapper = mapper.HtmlMapper(fmt=fmt,
+                                              default_color_by_attr=default_color_by_attr,
+                                              color_groups=color_groups,
+                                              format_attrs=self._format_attrs,
+                                              auto_color=auto_color)
