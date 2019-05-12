@@ -126,7 +126,8 @@ def test_get_name_color():
         assert expected_message in logged_item
 
 @pytest.fixture(params=[color_bucket_logger.ColorFormatter,
-                        color_bucket_logger.TermFormatter])
+                        color_bucket_logger.TermFormatter,
+                        color_bucket_logger.formatter.HtmlFormatter])
 def formatter_class(request):
     # _config()
     return request.param
@@ -140,6 +141,7 @@ def test_stuff(formatter_class):
     fmt_string = 'logger %(levelname)s %(created)s %(filename)s %(funcName)s ' + \
         '%(levelno)s %(module)s %(pathname)s %(process)d ' + \
         '%(thread)d %(name)s %(message)s'
+    fmt_string = 'tog %(levelname)s %(name)s %(message)s'
     logger, handler, formatter = setup_logger(color_groups=[('name', ['name', 'levelname'])],
                                               fmt=fmt_string,
                                               auto_color=True,
@@ -149,7 +151,8 @@ def test_stuff(formatter_class):
         '%(thread)d %(name)s %(message)s'
     slogger, shandler, formatter = setup_logger(color_groups=[('name', ['name', 'message']),
                                                               ('thread', ['process', 'filename'])],
-                                                fmt=sfmt,
+                                                # fmt=sfmt,
+                                                fmt=fmt_string,
                                                 auto_color=False,
                                                 formatter_class=formatter_class)
 
